@@ -1,0 +1,22 @@
+{
+    "name": "walnut/lib_datatype_importer",
+    "authors": [
+        {
+            "name": "Marian Kostadinov",
+            "email": "manchokapitancho@gmail.com"
+        }
+    ],
+	"autoload": {
+		"psr-4": {
+			"Walnut\\Lib\\DataType\\Importer\\": "src/"
+		}
+	},
+	"require": {
+		"walnut/lib_datatype": "^0.0.1",
+		"walnut/lib_jsonserializer": "^0.0.1"
+	},
+	"require-dev": {
+		"vimeo/psalm": "^4.9.3",
+		"phpunit/phpunit": "^9.5.9"
+	}
+}
