@@ -19,7 +19,7 @@ final class OpenApiClassReflector {
 	/**
 	 * @var ReflectionClass
 	 */
-	private /*readonly*/ ReflectionClass $reflectionClass;
+	private readonly ReflectionClass $reflectionClass;
 
 	/**
 	 * @param class-string<T> $className

@@ -17,7 +17,7 @@ use Walnut\Lib\DataType\Exception\InvalidData;
 final class OpenApiImporter implements DataImporter {
 
 	public function __construct(
-		private /*readonly*/ OpenApiReflector $reflector
+		private readonly OpenApiReflector $reflector
 	) { }
 
 	/**
