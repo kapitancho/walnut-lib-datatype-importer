@@ -12,8 +12,7 @@
 		}
 	},
 	"require": {
-		"walnut/lib_datatype": "^0.0.2",
-		"walnut/lib_jsonserializer": "^0.0.1"
+		"walnut/lib_datatype": "^0.0.3"
 	},
 	"require-dev": {
 		"vimeo/psalm": "^4.23.0",
