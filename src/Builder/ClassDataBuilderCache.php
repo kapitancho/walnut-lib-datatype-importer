@@ -3,13 +3,14 @@
 namespace Walnut\Lib\DataType\Importer\Builder;
 
 use Walnut\Lib\DataType\ClassData;
+use Walnut\Lib\DataType\EnumData;
 
 /**
  * @package Walnut\Lib\DataType
  */
 final class ClassDataBuilderCache implements ClassDataBuilder {
 	/**
-	 * @var array<class-string, ClassData>
+	 * @var array<class-string, ClassData|EnumData>
 	 */
 	private array $cache = [];
 	public function __construct(private readonly ClassDataBuilder $builder) {}
@@ -17,11 +18,11 @@ final class ClassDataBuilderCache implements ClassDataBuilder {
 	/**
 	 * @template T of object
 	 * @param class-string<T> $className
-	 * @return ClassData<T>
+	 * @return ClassData<T>|EnumData<T>
 	 */
-	public function buildForClass(string $className): ClassData {
+	public function buildForClass(string $className): ClassData|EnumData {
 		/**
-		 * @var ClassData<T>
+		 * @var ClassData<T>|EnumData<T>
 		 */
 		return $this->cache[$className] ??= $this->builder->buildForClass($className);
 	}

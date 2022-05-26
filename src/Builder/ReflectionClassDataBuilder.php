@@ -4,11 +4,15 @@ namespace Walnut\Lib\DataType\Importer\Builder;
 
 use ReflectionAttribute;
 use ReflectionClass;
+use ReflectionEnum;
+use ReflectionEnumBackedCase;
+use ReflectionEnumUnitCase;
 use ReflectionException;
 use ReflectionNamedType;
 use ReflectionParameter;
 use ReflectionProperty;
 use ReflectionUnionType;
+use RuntimeException;
 use Walnut\Lib\DataType\AnyData;
 use Walnut\Lib\DataType\AnyOfData;
 use Walnut\Lib\DataType\ArrayData;
@@ -17,6 +21,8 @@ use Walnut\Lib\DataType\ClassData;
 use Walnut\Lib\DataType\ClassRef;
 use Walnut\Lib\DataType\CompositeValue;
 use Walnut\Lib\DataType\DirectValue;
+use Walnut\Lib\DataType\EnumData;
+use Walnut\Lib\DataType\EnumDataType;
 use Walnut\Lib\DataType\IntegerData;
 use Walnut\Lib\DataType\NumberData;
 use Walnut\Lib\DataType\ObjectData;
@@ -28,14 +34,49 @@ use Walnut\Lib\DataType\StringData;
  */
 final class ReflectionClassDataBuilder implements ClassDataBuilder {
 	/**
+	 * @template T of object
+	 * @param class-string<T> $className
+	 * @return ClassData<T>|EnumData<T>
 	 * @throws ReflectionException
 	 */
-	public function buildForClass(string $className): ClassData {
+	public function buildForClass(string $className): ClassData|EnumData {
 		$r = new ReflectionClass($className);
+		if ($r->isEnum()) {
+			return $this->buildForEnum($className);
+		}
+
 		return new ClassData(
 			$className,
 			$this->getRequiredProperties($r),
 			$this->getAllPropertyData($r)
+		);
+	}
+
+	/**
+	 * @template T of object
+	 * @param class-string<T> $className
+	 * @return EnumData<T>
+	 * @throws ReflectionException
+	 */
+	private function buildForEnum(string $className): EnumData {
+		$r = new ReflectionEnum($className);
+		$cases = $r->getCases();
+		if (!$cases) {
+			throw new RuntimeException("Cannot import values from an empty Enum");
+		}
+		return new EnumData(
+			$className,
+			match(true) {
+				!$r->isBacked() => EnumDataType::UNIT,
+				($r->getBackingType() instanceof ReflectionNamedType) &&
+					$r->getBackingType()->getName() === 'int' => EnumDataType::INT,
+				default => EnumDataType::STRING
+			},
+			$r->isBacked() ?
+				array_map(static fn(ReflectionEnumBackedCase $backedCase): int|string =>
+				$backedCase->getBackingValue(), $cases) :
+				array_map(static fn(ReflectionEnumUnitCase $unitCase): string =>
+				$unitCase->getName(), $cases)
 		);
 	}
 
