@@ -10,13 +10,13 @@ use Walnut\Lib\DataType\Exception\InvalidValue;
 interface ClassHydrator {
 	/**
 	 * @template T of object
-	 * @param array|object $value
+	 * @param null|string|float|int|bool|array|object $value
 	 * @param class-string<T> $className
 	 * @return T
 	 * @throws InvalidValue
 	 */
 	public function importValue(
-		array|object $value,
+		null|string|float|int|bool|array|object $value,
 		string $className
 	): object;
 }

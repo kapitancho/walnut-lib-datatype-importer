@@ -80,8 +80,8 @@ final class ReflectionClassDataBuilder implements ClassDataBuilder {
 			$className,
 			match(true) {
 				!$r->isBacked() => EnumDataType::UNIT,
-				($r->getBackingType() instanceof ReflectionNamedType) &&
-					$r->getBackingType()->getName() === 'int' => EnumDataType::INT,
+				(($backingType = $r->getBackingType()) instanceof ReflectionNamedType) &&
+					$backingType->getName() === 'int' => EnumDataType::INT,
 				default => EnumDataType::STRING
 			},
 			$r->isBacked() ?

@@ -14,12 +14,12 @@ final class DefaultClassHydrator implements ClassHydrator {
 
 	/**
 	 * @template T of object
-	 * @param array|object $value
+	 * @param null|string|float|int|bool|array|object $value
 	 * @param class-string<T> $className
 	 * @return T
 	 */
 	public function importValue(
-		array|object $value,
+		null|string|float|int|bool|array|object $value,
 		string $className
 	): object {
 		return $this->refValueImporter->importRefValue($value, $className);
