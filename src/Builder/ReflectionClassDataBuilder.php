@@ -28,6 +28,8 @@ use Walnut\Lib\DataType\NumberData;
 use Walnut\Lib\DataType\ObjectData;
 use Walnut\Lib\DataType\RefValue;
 use Walnut\Lib\DataType\StringData;
+use Walnut\Lib\DataType\WrapperClassData;
+use Walnut\Lib\DataType\WrapperData;
 
 /**
  * @package Walnut\Lib\DataType
@@ -36,13 +38,23 @@ final class ReflectionClassDataBuilder implements ClassDataBuilder {
 	/**
 	 * @template T of object
 	 * @param class-string<T> $className
-	 * @return ClassData<T>|EnumData<T>
+	 * @return ClassData<T>|EnumData<T>|WrapperClassData<T>
 	 * @throws ReflectionException
 	 */
-	public function buildForClass(string $className): ClassData|EnumData {
+	public function buildForClass(string $className): ClassData|EnumData|WrapperClassData {
 		$r = new ReflectionClass($className);
 		if ($r->isEnum()) {
 			return $this->buildForEnum($className);
+		}
+		if ($r->getAttributes(WrapperData::class)) {
+			$singleProperty = count($r->getProperties()) === 1 ? $r->getProperties()[0] : null;
+			if ($singleProperty) {
+				return new WrapperClassData(
+					$className,
+					$singleProperty->getName(),
+					$this->getPropertyValueImporter($singleProperty)
+				);
+			}
 		}
 
 		return new ClassData(

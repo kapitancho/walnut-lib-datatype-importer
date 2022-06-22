@@ -3,10 +3,33 @@
 namespace Walnut\Lib\DataType\Builder;
 
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use Walnut\Lib\DataType\ClassData;
 use Walnut\Lib\DataType\Importer\Builder\ReflectionClassDataBuilder;
 use Walnut\Lib\DataType\EnumDataType;
+use Walnut\Lib\DataType\StringData;
+use Walnut\Lib\DataType\WrapperClassData;
+use Walnut\Lib\DataType\WrapperData;
 
+#[WrapperData]
+final class ReflectionClassDataBuilderTestWrapperDataOk {
+	public function __construct(
+		public string $property1,
+	) {}
+}
+#[WrapperData]
+final class ReflectionClassDataBuilderTestWrapperDataNoProperties {
+	public function __construct() {}
+}
+#[WrapperData]
+final class ReflectionClassDataBuilderTestWrapperDataMoreProperties {
+	public function __construct(
+		public string $property1,
+		public string $property2
+	) {}
+}
+
+enum ReflectionClassDataBuilderEmptyEnum {}
 enum ReflectionClassDataBuilderTestIntEnum: int { case A = 1; case C = 3; }
 enum ReflectionClassDataBuilderTestStringEnum: string { case A = 'z'; case C = 'x'; }
 enum ReflectionClassDataBuilderTestUnitEnum { case A; case C; }
@@ -36,11 +59,34 @@ final class ReflectionClassDataBuilderTest extends TestCase {
 		$this->assertEquals(ReflectionClassDataBuilderTestStringEnum::C, $stringEnum->importValue('x'));
 	}
 
+	public function testEmptyEnum(): void {
+		$this->expectException(RuntimeException::class);
+		$this->builder->buildForClass(ReflectionClassDataBuilderEmptyEnum::class);
+	}
+
 	public function testUnitEnum(): void {
 		$unitEnum = $this->builder->buildForClass(ReflectionClassDataBuilderTestUnitEnum::class);
 		$this->assertEquals(EnumDataType::UNIT, $unitEnum->type);
 		$this->assertEquals(['A', 'C'], $unitEnum->values);
 		$this->assertEquals(ReflectionClassDataBuilderTestUnitEnum::C, $unitEnum->importValue('C'));
+	}
+
+	public function testWrapperDataOk(): void {
+		$wrapperClassData = $this->builder->buildForClass(ReflectionClassDataBuilderTestWrapperDataOk::class);
+		$this->assertInstanceOf(WrapperClassData::class, $wrapperClassData);
+		$this->assertEquals(ReflectionClassDataBuilderTestWrapperDataOk::class, $wrapperClassData->className);
+		$this->assertEquals('property1', $wrapperClassData->propertyName);
+		$this->assertInstanceOf(StringData::class, $wrapperClassData->propertyValue);
+	}
+
+	public function testWrapperDataNoProperties(): void {
+		$this->assertInstanceOf(ClassData::class,
+			$this->builder->buildForClass(ReflectionClassDataBuilderTestWrapperDataNoProperties::class));
+	}
+
+	public function testWrapperDataMoreProperties(): void {
+		$this->assertInstanceOf(ClassData::class,
+			$this->builder->buildForClass(ReflectionClassDataBuilderTestWrapperDataMoreProperties::class));
 	}
 
 	public function testBuilder(): void {
