@@ -20,6 +20,7 @@ use Walnut\Lib\DataType\BooleanData;
 use Walnut\Lib\DataType\ClassData;
 use Walnut\Lib\DataType\ClassRef;
 use Walnut\Lib\DataType\CompositeValue;
+use Walnut\Lib\DataType\CustomClassData;
 use Walnut\Lib\DataType\DirectValue;
 use Walnut\Lib\DataType\EnumData;
 use Walnut\Lib\DataType\EnumDataType;
@@ -41,7 +42,7 @@ final class ReflectionClassDataBuilder implements ClassDataBuilder {
 	 * @return ClassData<T>|EnumData<T>|WrapperClassData<T>
 	 * @throws ReflectionException
 	 */
-	public function buildForClass(string $className): ClassData|EnumData|WrapperClassData {
+	public function buildForClass(string $className): ClassData|EnumData|WrapperClassData|CustomClassData {
 		$r = new ReflectionClass($className);
 		if ($r->isEnum()) {
 			return $this->buildForEnum($className);
@@ -55,6 +56,9 @@ final class ReflectionClassDataBuilder implements ClassDataBuilder {
 					$this->getPropertyValueImporter($singleProperty)
 				);
 			}
+		}
+		if ($a = $r->getAttributes(DirectValue::class, ReflectionAttribute::IS_INSTANCEOF)) {
+			return new CustomClassData($className, $a[0]->newInstance());
 		}
 
 		return new ClassData(
